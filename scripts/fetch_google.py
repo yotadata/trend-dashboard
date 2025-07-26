@@ -5,7 +5,7 @@ def fetch_google_trends():
     """
     GoogleトレンドのRSSフィードから日本の急上昇ワードを取得する
     """
-    url = "https://trends.google.co.jp/trends/trendingsearches/daily/rss?geo=JP"
+    url = "https://trends.google.co.jp/trending/rss?geo=JP"
     try:
         response = requests.get(url)
         response.raise_for_status()  # エラーがあれば例外を発生させる

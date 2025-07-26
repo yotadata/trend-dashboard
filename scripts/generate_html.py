@@ -3,10 +3,10 @@ from jinja2 import Environment, FileSystemLoader
 from datetime import datetime, timezone, timedelta
 
 # 各トレンド取得スクリプトをインポート
-from scripts.fetch_google import fetch_google_trends
-from scripts.fetch_yahoo import fetch_yahoo_trends
-from scripts.fetch_togetter import fetch_togetter_trends
-from scripts.fetch_youtube import fetch_youtube_trends
+from fetch_google import fetch_google_trends
+from fetch_yahoo import fetch_yahoo_trends
+from fetch_togetter import fetch_togetter_trends
+from fetch_youtube import fetch_youtube_trends
 
 def generate_html():
     """
