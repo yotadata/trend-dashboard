@@ -31,10 +31,10 @@ def save_trends_to_sheet(trends_data):
             worksheet = spreadsheet.worksheet(current_month_str)
         except gspread.exceptions.WorksheetNotFound:
             print(f"Worksheet '{current_month_str}' not found. Creating a new one.")
-            worksheet = spreadsheet.add_worksheet(title=current_month_str, rows="1000", cols="4")
-            worksheet.append_row(["timestamp", "source", "keyword", "rank"], value_input_option='USER_ENTERED')
+            worksheet = spreadsheet.add_worksheet(title=current_month_str, rows="1000", cols="5")
+            worksheet.append_row(["date", "time", "source", "keyword", "rank"], value_input_option='USER_ENTERED')
             print(f"Worksheet '{current_month_str}' created and header added.")
-        
+
         # --- 今日の日付のデータが既に存在するかチェック ---
         jst = timezone(timedelta(hours=+9), 'JST')
         today_jst_str = datetime.now(jst).strftime('%Y-%m-%d')
@@ -43,11 +43,8 @@ def save_trends_to_sheet(trends_data):
         
         if len(all_values) > 1: # ヘッダー行以外にデータがある場合のみチェック
             for row in all_values[1:]:
-                if row and row[0]: # タイムスタンプ列が存在する場合
-                    utc_timestamp = datetime.fromisoformat(row[0])
-                    row_jst_date_str = utc_timestamp.astimezone(jst).strftime('%Y-%m-%d')
-                    
-                    if row_jst_date_str == today_jst_str:
+                if row and row[0]: # 日付列が存在する場合
+                    if row[0] == today_jst_str:
                         print(f"Data for today ({today_jst_str}) already exists. Skipping save.")
                         return # 処理を終了
 
@@ -55,7 +52,8 @@ def save_trends_to_sheet(trends_data):
         rows_to_append = []
         for item in trends_data:
             rows_to_append.append([
-                item["timestamp"],
+                item["date"],
+                item["time"],
                 item["source"],
                 item["keyword"],
                 item["rank"]

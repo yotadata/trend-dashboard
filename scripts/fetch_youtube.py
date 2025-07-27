@@ -15,7 +15,7 @@ def fetch_youtube_trends():
         "?part=snippet"
         "&chart=mostPopular"
         "&regionCode=JP"
-        "&maxResults=10"
+        "&maxResults=25"
         f"&key={api_key}"
     )
 

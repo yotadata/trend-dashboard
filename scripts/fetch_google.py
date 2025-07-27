@@ -31,7 +31,7 @@ def fetch_google_trends():
         trend_elements = driver.find_elements(By.CSS_SELECTOR, 'div.search-card-title > span')
         trends = [elem.text for elem in trend_elements if elem.text]
         
-        return trends[:10]
+        return trends[:25]
 
     except Exception as e:
         print(f"An error occurred during scraping with Selenium: {e}")

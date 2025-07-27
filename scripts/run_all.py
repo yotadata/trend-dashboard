@@ -12,7 +12,9 @@ from .save_to_sheet import save_trends_to_sheet
 
 def run_all_tasks():
     jst = timezone(timedelta(hours=+9), 'JST')
-    utc_now_iso = datetime.now(timezone.utc).isoformat()
+    utc_now = datetime.now(timezone.utc)
+    utc_date_str = utc_now.strftime('%Y-%m-%d')
+    utc_time_str = utc_now.strftime('%H:%M:%S')
 
     sources = {
         "Google Trends": fetch_google_trends,
@@ -34,7 +36,8 @@ def run_all_tasks():
             
             for i, keyword in enumerate(trends, 1):
                 data_for_sheet.append({
-                    "timestamp": utc_now_iso,
+                    "date": utc_date_str,
+                    "time": utc_time_str,
                     "source": source_name,
                     "keyword": keyword,
                     "rank": i
