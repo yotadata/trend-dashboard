@@ -1,6 +1,9 @@
 name: Update Trend Dashboard
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
@@ -37,3 +40,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./output
+          publish_branch: gh-pages # デプロイ先ブランチを明示
+          # cname: example.com # カスタムドメインを使う場合はコメントを外して設定
