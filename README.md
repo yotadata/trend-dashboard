@@ -14,27 +14,30 @@
 
 ## ⚙️ セットアップと実行
 
-### 1. APIキーの取得と設定
+### 1. APIキーとWebhook URLの取得・設定
 
-本ダッシュボードは、YouTubeのトレンド情報を取得するために **YouTube Data API v3** を使用します。  
-APIを利用するには、Google Cloud Platform (GCP) で **APIキー** を取得し、このリポジトリに設定する必要があります。
+本ダッシュボードは、トレンド情報取得や通知のために外部サービスを利用します。  
+以下のキーとURLを取得し、このリポジトリに設定してください。
 
-1.  **APIキーの取得:**
-    1.  [Google Cloud Platform](https://console.cloud.google.com/) にアクセスし、Googleアカウントでログインします。
-    2.  新しいプロジェクトを作成するか、既存のプロジェクトを選択します。
-    3.  左上のメニューから「APIとサービス」>「ライブラリ」を選択します。
-    4.  `YouTube Data API v3` を検索し、有効化します。
-    5.  左メニューの「APIとサービス」>「認証情報」を選択します。
-    6.  画面上部の「認証情報を作成」をクリックし、「APIキー」を選択します。
-    7.  作成されたAPIキーが表示されたら、コピーしておきます。
+1.  **YouTube Data APIキー:**
+    *   **目的:** YouTubeの急上昇動画を取得するために使用します。
+    *   **取得方法:**
+        1.  [Google Cloud Platform](https://console.cloud.google.com/) にアクセスし、プロジェクトを作成または選択します。
+        2.  `YouTube Data API v3` を検索して有効化します。
+        3.  「認証情報」から **APIキー** を作成し、コピーします。
+    *   **GitHubへの設定:**
+        *   リポジトリの `Settings` > `Secrets and variables` > `Actions` を開きます。
+        *   `New repository secret` をクリックし、**Name** に `YOUTUBE_API_KEY`、**Secret** にコピーしたAPIキーを設定します。
 
-2.  **GitHubリポジトリへの設定:**
-    1.  このGitHubリポジトリのページにアクセスします。
-    2.  `Settings` タブ > `Secrets and variables` > `Actions` を選択します。
-    3.  `New repository secret` ボタンをクリックします。
-    4.  **Name** に `YOUTUBE_API_KEY` と入力します。
-    5.  **Secret** に、先ほどコピーしたAPIキーを貼り付けます。
-    6.  `Add secret` をクリックして保存します。
+2.  **Discord Webhook URL:**
+    *   **目的:** 毎日のトレンド更新をDiscordチャンネルに通知するために使用します。
+    *   **取得方法:**
+        1.  通知したいDiscordチャンネルの「チャンネルの編集」>「連携サービス」を開きます。
+        2.  「ウェブフックを作成」ボタンを押し、任意の名前（例: TrendDashboard Bot）を付けます。
+        3.  「ウェブフックURLをコピー」をクリックします。
+    *   **GitHubへの設定:**
+        *   上記と同様に、リポジトリのActions Secretsを開きます。
+        *   `New repository secret` をクリックし、**Name** に `DISCORD_WEBHOOK_URL`、**Secret** にコピーしたWebhook URLを設定します。
 
 ### 2. GitHub Pages の設定
 

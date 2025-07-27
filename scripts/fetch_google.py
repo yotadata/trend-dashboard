@@ -4,41 +4,37 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import os
+from webdriver_manager.chrome import ChromeDriverManager
 
 def fetch_google_trends():
     """
-    Seleniumを使ってGoogleトレンドの24時間集計ページをスクレイピングする
+    Seleniumとwebdriver-managerを使ってGoogleトレンドの24時間集計ページをスクレイピングする
     """
     url = "https://trends.google.co.jp/trending?geo=JP&hours=24"
     
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # ヘッドレスモードで実行
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080") # ウィンドウサイズ指定
-    
-    # プロジェクトルートからの相対パスでWebDriverを指定
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    driver_path = os.path.join(project_root, 'drivers', 'chromedriver')
+    chrome_options.add_argument("--window-size=1920,1080")
     
     driver = None
     try:
-        service = Service(executable_path=driver_path)
+        # webdriver-managerが適切なChromeDriverを自動でダウンロード・セットアップする
+        service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
         driver.get(url)
         
-        # ページが完全に読み込まれるまで待機（最大20秒）
-        # 'div.search-card-title > span' というセレクタの要素が表示されるまで待つ
+        # CSSセレクタの要素が表示されるまで待機（最大20秒）
         wait = WebDriverWait(driver, 20)
-        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.search-card-title > span')))
+        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'tbody:last-of-type > tr > td')))
         
         # トレンドワードを取得
-        trend_elements = driver.find_elements(By.CSS_SELECTOR, 'div.search-card-title > span')
+        trend_elements = driver.find_elements(By.CSS_SELECTOR, 'tbody:last-of-type > tr > td:nth-of-type(2)')
         trends = [elem.text for elem in trend_elements if elem.text]
         
-        return trends[:10]
+        return trends
 
     except Exception as e:
         print(f"An error occurred during scraping with Selenium: {e}")
@@ -48,8 +44,6 @@ def fetch_google_trends():
             driver.quit()
 
 if __name__ == '__main__':
-    # ローカルでテスト実行する場合、ChromeDriverのインストールとPATH設定が必要です
-    # https://chromedriver.chromium.org/downloads
     trends = fetch_google_trends()
     if trends:
         print("Google Trends (Last 24 hours via Selenium):")
