@@ -31,8 +31,8 @@ def save_trends_to_sheet(trends_data):
             worksheet = spreadsheet.worksheet(current_month_str)
         except gspread.exceptions.WorksheetNotFound:
             print(f"Worksheet '{current_month_str}' not found. Creating a new one.")
-            worksheet = spreadsheet.add_worksheet(title=current_month_str, rows="1000", cols="5")
-            worksheet.append_row(["date", "time", "source", "keyword", "rank"], value_input_option='USER_ENTERED')
+            worksheet = spreadsheet.add_worksheet(title=current_month_str, rows="1000", cols="6")
+            worksheet.append_row(["date", "time", "source", "keyword", "rank", "raw_data"], value_input_option='USER_ENTERED')
             print(f"Worksheet '{current_month_str}' created and header added.")
 
         # --- 今日の日付のデータが既に存在するかチェック ---
@@ -56,7 +56,8 @@ def save_trends_to_sheet(trends_data):
                 item["time"],
                 item["source"],
                 item["keyword"],
-                item["rank"]
+                item["rank"],
+                json.dumps(item, ensure_ascii=False)
             ])
             
         if not rows_to_append:
