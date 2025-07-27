@@ -25,12 +25,15 @@ def fetch_google_trends():
 
         driver.get(url)
         
-        wait = WebDriverWait(driver, 20)
-        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.search-card-title > span')))
+        wait = WebDriverWait(driver, 30) # 待ち時間を30秒に延長
+        # より安定している可能性のある親要素を待つ
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.feed-list-wrapper')))
         
-        trend_elements = driver.find_elements(By.CSS_SELECTOR, 'div.search-card-title > span')
+        # 要素のセレクタをより具体的に、かつ構造の変化に強い可能性のあるものに変更
+        trend_elements = driver.find_elements(By.CSS_SELECTOR, 'div.feed-item-header a.title')
         trends = [elem.text for elem in trend_elements if elem.text]
         
+        # Googleトレンドは通常20件なので、25件に制限するのは念のため
         return trends[:25]
 
     except Exception as e:
