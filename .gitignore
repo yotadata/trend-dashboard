@@ -1,6 +1,9 @@
 # Python virtual environment
 venv/
 
+# Drivers
+drivers/
+
 # Python cache
 __pycache__/
 *.pyc
