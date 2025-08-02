@@ -30,18 +30,26 @@ def run_all_tasks():
     for source_name, fetch_function in sources.items():
         print(f"Fetching {source_name}...")
         try:
-            trends = fetch_function()
-            all_trends_for_ranking.extend(trends)
-            categories_for_html.append({"name": source_name, "trends": trends})
+            # fetch_functionは辞書を返すことを想定
+            trends_by_source = fetch_function()
             
-            for i, keyword in enumerate(trends, 1):
-                data_for_sheet.append({
-                    "date": utc_date_str,
-                    "time": utc_time_str,
-                    "source": source_name,
-                    "keyword": keyword,
-                    "rank": i
-                })
+            # 辞書からソース名とトレンドリストを取得
+            for fetched_source_name, trends_list in trends_by_source.items():
+                # all_trends_for_ranking にはキーワードのみを追加
+                all_trends_for_ranking.extend([item['term'] for item in trends_list])
+                
+                # categories_for_html にはソース名とトレンドリストをそのまま追加
+                categories_for_html.append({"name": fetched_source_name, "trends": trends_list})
+                
+                # data_for_sheet には各トレンドの詳細を追加
+                for item in trends_list:
+                    data_for_sheet.append({
+                        "date": utc_date_str,
+                        "time": utc_time_str,
+                        "source": fetched_source_name,
+                        "keyword": item['term'],
+                        "rank": item['rank']
+                    })
         except Exception as e:
             print(f"  Error fetching {source_name}: {e}")
             categories_for_html.append({"name": source_name, "trends": []})
@@ -59,7 +67,11 @@ def run_all_tasks():
     message_lines.append("\n**🔍 各ソースのトレンド**")
     for cat in categories_for_html:
         if cat['trends']:
-            message_lines.append(f"- **{cat['name']}:** {', '.join(cat['trends'][:3])}...")
+            message_lines.append(f"\n**--- {cat['name']} ---**")
+            for item in cat['trends']:
+                message_lines.append(f"{item['rank']}. {item['term']}")
+        else:
+            message_lines.append(f"\n**--- {cat['name']} (データなし) ---**")
     
     send_discord_notification("\n".join(message_lines))
 
