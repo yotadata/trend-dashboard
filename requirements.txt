@@ -7,3 +7,4 @@ selenium
 webdriver-manager
 gspread
 google-auth-oauthlib
+python-dotenv

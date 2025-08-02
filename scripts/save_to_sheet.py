@@ -2,6 +2,9 @@ import gspread
 import os
 import json
 from datetime import datetime, timezone, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def save_trends_to_sheet(trends_data):
     """

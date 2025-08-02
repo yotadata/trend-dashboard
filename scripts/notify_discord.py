@@ -1,6 +1,9 @@
 import requests
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def send_discord_notification(message_content):
     """
@@ -12,10 +15,10 @@ def send_discord_notification(message_content):
         return
 
     payload = {
+        "content": message_content,
         "embeds": [
             {
                 "title": "📊 トレンドダッシュボード更新通知",
-                "description": message_content,
                 "color": 5814783
             }
         ]

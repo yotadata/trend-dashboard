@@ -13,10 +13,11 @@ def fetch_google_trends():
     url = "https://trends.google.co.jp/trending?geo=JP&hours=24"
     
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-search-engine-choice-screen")
     
     driver = None
     try:
