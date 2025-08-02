@@ -35,6 +35,27 @@ jobs:
           SPREADSHEET_KEY: ${{ secrets.SPREADSHEET_KEY }}
         run: python3 -m scripts.run_all
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Run BigQuery query
+        run: |
+          bq query --use_legacy_sql=false --format=csv --project_id=${{ secrets.GCP_PROJECT_ID }} '
+          SELECT
+            refresh_date as date,
+            country_name as country,
+            term,
+            rank
+          FROM `bigquery-public-data.google_trends.international_top_terms`
+          WHERE
+              refresh_date = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
+              AND country_name = "Japan"
+          GROUP BY country_name, term, rank, refresh_date
+          ORDER BY rank asc
+          ' > output/bigquery_trends.csv
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

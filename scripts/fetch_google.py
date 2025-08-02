@@ -1,54 +1,67 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+import os
+import json
+from datetime import datetime, timedelta
+from google.cloud import bigquery
+from google.oauth2 import service_account
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def fetch_google_trends():
     """
-    Seleniumとwebdriver-managerを使ってGoogleトレンドの24時間集計ページをスクレイピングする
+    BigQueryのgoogle_trends.international_top_termsテーブルから、
+    前日の日本のトレンドデータを取得する。
     """
-    url = "https://trends.google.co.jp/trending?geo=JP&hours=24"
-    
-    chrome_options = Options()
-    # chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--disable-search-engine-choice-screen")
-    
-    driver = None
-    try:
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+    sa_key_str = os.environ.get("GCP_SA_KEY")
+    project_id = os.environ.get("GCP_PROJECT_ID")
 
-        driver.get(url)
-        
-        wait = WebDriverWait(driver, 30) # 待ち時間を30秒に延長
-        # より安定している可能性のある親要素を待つ
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.feed-list-wrapper')))
-        
-        # 要素のセレクタをより具体的に、かつ構造の変化に強い可能性のあるものに変更
-        trend_elements = driver.find_elements(By.CSS_SELECTOR, 'div.feed-item-header a.title')
-        trends = [elem.text for elem in trend_elements if elem.text]
-        
-        # Googleトレンドは通常20件なので、25件に制限するのは念のため
-        return trends[:25]
+    if not sa_key_str:
+        print("Warning: GCP_SA_KEY environment variable not set. Skipping Google trends.")
+        return []
+
+    try:
+        sa_key_json = json.loads(sa_key_str)
+        credentials = service_account.Credentials.from_service_account_info(
+            sa_key_json,
+            scopes=["https://www.googleapis.com/auth/bigquery"],
+        )
+        client = bigquery.Client(credentials=credentials, project=project_id)
+
+        # クエリの日付を昨日に設定
+        yesterday = datetime.now() - timedelta(days=1)
+        yesterday_str = yesterday.strftime('%Y-%m-%d')
+
+        query = f"""
+            SELECT
+              term
+            FROM `bigquery-public-data.google_trends.international_top_terms`
+            WHERE
+                refresh_date = DATE('{yesterday_str}')
+                AND country_name = "Japan"
+            GROUP BY term, rank
+            ORDER BY rank asc
+            LIMIT 25
+        """
+
+        query_job = client.query(query)
+        results = query_job.result()  # Waits for the job to complete.
+
+        trends = [row.term for row in results]
+        return trends
 
     except Exception as e:
-        print(f"An error occurred during scraping with Selenium: {e}")
+        print(f"An error occurred while fetching from BigQuery: {e}")
         return []
-    finally:
-        if driver:
-            driver.quit()
 
 if __name__ == '__main__':
-    trends = fetch_google_trends()
-    if trends:
-        print("Google Trends (Last 24 hours via Selenium):")
-        for i, trend in enumerate(trends, 1):
-            print(f"{i}. {trend}")
+    # .envファイルにGCP_PROJECT_IDも設定してください
+    if not os.environ.get("GCP_PROJECT_ID"):
+        print("Please set the GCP_PROJECT_ID environment variable in your .env file.")
     else:
-        print("Failed to fetch Google Trends with Selenium.")
+        trends = fetch_google_trends()
+        if trends:
+            print("Google Trends (Yesterday from BigQuery):")
+            for i, trend in enumerate(trends, 1):
+                print(f"{i}. {trend}")
+        else:
+            print("Failed to fetch Google Trends from BigQuery.")

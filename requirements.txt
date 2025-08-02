@@ -8,3 +8,4 @@ webdriver-manager
 gspread
 google-auth-oauthlib
 python-dotenv
+google-cloud-bigquery
