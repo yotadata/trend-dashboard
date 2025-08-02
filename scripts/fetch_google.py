@@ -46,22 +46,28 @@ def fetch_google_trends():
         query_job = client.query(query)
         results = query_job.result()  # Waits for the job to complete.
 
-        trends = [row.term for row in results]
-        return trends
+        trends_data = []
+        for i, row in enumerate(results, 1):
+            trends_data.append({
+                "rank": i,
+                "term": row.term
+            })
+        return {"Google Trends": trends_data}
 
     except Exception as e:
         print(f"An error occurred while fetching from BigQuery: {e}")
-        return []
+        return {}
 
 if __name__ == '__main__':
     # .envファイルにGCP_PROJECT_IDも設定してください
     if not os.environ.get("GCP_PROJECT_ID"):
         print("Please set the GCP_PROJECT_ID environment variable in your .env file.")
     else:
-        trends = fetch_google_trends()
-        if trends:
-            print("Google Trends (Yesterday from BigQuery):")
-            for i, trend in enumerate(trends, 1):
-                print(f"{i}. {trend}")
+        trends_by_source = fetch_google_trends()
+        if trends_by_source:
+            for source, trends_list in trends_by_source.items():
+                print(f"--- {source} (Yesterday from BigQuery): ---")
+                for item in trends_list:
+                    print(f"{item['rank']}. {item['term']}")
         else:
             print("Failed to fetch Google Trends from BigQuery.")

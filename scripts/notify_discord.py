@@ -16,12 +16,6 @@ def send_discord_notification(message_content):
 
     payload = {
         "content": message_content,
-        "embeds": [
-            {
-                "title": "📊 トレンドダッシュボード更新通知",
-                "color": 5814783
-            }
-        ]
     }
 
     try:
