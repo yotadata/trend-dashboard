@@ -32,6 +32,7 @@ def run_all_tasks():
         try:
             # fetch_functionは辞書を返すことを想定
             trends_by_source = fetch_function()
+            print(f"  Raw data from {source_name}: {trends_by_source}") # デバッグ用
             
             # 辞書からソース名とトレンドリストを取得
             for fetched_source_name, trends_list in trends_by_source.items():
@@ -53,6 +54,8 @@ def run_all_tasks():
         except Exception as e:
             print(f"  Error fetching {source_name}: {e}")
             categories_for_html.append({"name": source_name, "trends": []})
+
+    print(f"Final categories_for_html: {categories_for_html}") # デバッグ用
 
     if data_for_sheet:
         save_trends_to_sheet(data_for_sheet)
