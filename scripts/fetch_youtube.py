@@ -27,25 +27,29 @@ def fetch_youtube_trends():
         response.raise_for_status()
         data = response.json()
         
-        trends = []
-        for item in data.get("items", []):
+        trends_data = []
+        for i, item in enumerate(data.get("items", []), 1):
             title = item["snippet"]["title"]
-            trends.append(title)
+            trends_data.append({
+                "rank": i,
+                "term": title
+            })
             
-        return trends
+        return {"YouTube": trends_data}
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching YouTube trends: {e}")
-        return []
+        return {}
     except Exception as e:
         print(f"An error occurred: {e}")
-        return []
+        return {}
 
 if __name__ == '__main__':
-    trends = fetch_youtube_trends()
-    if trends:
-        print("YouTube Popular Videos (Japan):")
-        for i, trend in enumerate(trends, 1):
-            print(f"{i}. {trend}")
+    trends_by_source = fetch_youtube_trends()
+    if trends_by_source:
+        for source, trends_list in trends_by_source.items():
+            print(f"--- {source} Popular Videos (Japan): ---")
+            for item in trends_list:
+                print(f"{item['rank']}. {item['term']}")
     else:
         print("Failed to fetch YouTube trends.")
